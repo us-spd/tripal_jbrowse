@@ -306,7 +306,7 @@ function tripal_jbrowse_mgmt_update_track($track, array $fields) {
  */
 function tripal_jbrowse_mgmt_get_organisms_list() {
   return db_select('chado.organism', 'CO')
-    ->fields('CO', ['organism_id', 'genus', 'species', 'common_name'])
+    ->fields('CO', ['abbreviation', 'organism_id', 'genus', 'species', 'common_name'])
     ->execute()
     ->fetchAll();
 }
@@ -337,7 +337,10 @@ function tripal_jbrowse_mgmt_construct_organism_name($organism) {
   $name .= " $organism->species";
 
   if (!empty($organism->common_name)) {
-    $name .= " ($organism->common_name)";
+    $name = $organism->common_name;
+    if (!empty($organism->abbreviation)) {
+      $name .= " ($organism->abbreviation)";
+    }
   }
 
   return $name;
