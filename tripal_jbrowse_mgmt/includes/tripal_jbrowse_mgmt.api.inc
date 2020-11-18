@@ -65,6 +65,7 @@ function tripal_jbrowse_mgmt_get_instances($conditions = NULL) {
   }
 
   $instances = $instances->execute()->fetchAll();
+  $title = array(); //sort by title
 
   foreach ($instances as $key => &$instance) {
     if (!isset($users[$instance->uid])) {
@@ -89,10 +90,11 @@ function tripal_jbrowse_mgmt_get_instances($conditions = NULL) {
       $instance->analysis->url = NULL;
       if ($instance->analysis->entity_id) {
         $instance->analysis->url = url('/bio_data/' . $instance->analysis->entity_id);
-      }
+      } 
     }
-
+    $title[$key] = $instance->title;
   }
+  array_multisort($title, SORT_ASC, $instances);
   return $instances;
 }
 
@@ -305,10 +307,15 @@ function tripal_jbrowse_mgmt_update_track($track, array $fields) {
  * @return mixed
  */
 function tripal_jbrowse_mgmt_get_organisms_list() {
-  return db_select('chado.organism', 'CO')
+  $organism_array = db_select('chado.organism', 'CO')
     ->fields('CO', ['abbreviation', 'organism_id', 'genus', 'species', 'common_name'])
     ->execute()
     ->fetchAll();
+  $common_name = array_column($organism_array, 'common_name');
+  if(count(array_filter($common_name)) == count($common_name)) {
+    array_multisort($common_name, SORT_ASC, $organism_array);
+  }
+  return $organism_array;
 }
 
 /**
